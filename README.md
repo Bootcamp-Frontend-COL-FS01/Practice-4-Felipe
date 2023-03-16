@@ -10,7 +10,7 @@ To run the project locally, follow these steps:
 
 2. Install the project dependencies:
 
-        cd WebPackTicTacToe-Felipe
+        cd Practice-4-Felipe
         npm install
 
 3. Start the development server:
