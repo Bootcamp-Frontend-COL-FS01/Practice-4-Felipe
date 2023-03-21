@@ -29,3 +29,5 @@ To run the project locally, follow these steps:
 3. Start the development server:
 
         npm run dev
+
+4. You can try it yourself here: https://bootcamp-frontend-col-fs01.github.io/Practice-4-Felipe/
