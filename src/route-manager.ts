@@ -1,3 +1,5 @@
+import firebase from "firebase/compat/app";
+
 export class RouteManager {
   private routes: { [key: string]: () => void };
 
@@ -7,12 +9,23 @@ export class RouteManager {
   }
 
   onHashChange() {
-    const route = window.location.hash.slice(1) || "#";
+    const route = window.location.hash.slice(1) || "login";
+    if (route === "login") {
+      firebase
+        .auth()
+        .signOut()
+        .then(() => {
+          console.log("Usuario desconectado");
+        })
+        .catch((error) => {
+          console.log("Ocurrió un error al desconectar al usuario:", error);
+        });
+    }
     if (route in this.routes) {
       this.routes[route]();
     } else {
       console.log("La ruta no existe en this.routes");
-      window.location.replace("#");
+      window.location.replace("#login");
     }
   }
 
