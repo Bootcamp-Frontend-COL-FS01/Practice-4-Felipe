@@ -13,6 +13,19 @@ To run the project locally, follow these steps:
         cd WebPackTicTacToe-Felipe
         npm install
 
+3. Create a new firebase project and enable realtime database and storage
+
+4. Create a file called "enviroment.ts" in the folder enviroments with this configuration:
+
+        export const environment = {
+          apiKey: yourFirebaseKeys
+          authDomain: yourFirebaseKeys,
+          projectId: yourFirebaseKeys,
+          storageBucket: yourFirebaseKeys,
+          messagingSenderId: 
+          appId: yourFirebaseKeys
+        };
+
 3. Start the development server:
 
-        npm start or npm run dev
+        npm run dev

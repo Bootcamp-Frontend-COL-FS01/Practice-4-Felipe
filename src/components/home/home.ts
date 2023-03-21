@@ -1,20 +1,29 @@
+import { Header } from "./../../shared/header/header";
 import { Post } from "./components/post/post";
 import HomeHtml from "./home.html";
-import firebase from "firebase/compat/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { getDatabase, set, ref as refDb, get, update } from "firebase/database";
+import {
+  getDatabase,
+  set,
+  ref as refDb,
+  get,
+  update,
+  remove,
+} from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { v4 as uuidv4 } from "uuid";
 import "./home.scss";
 
 export class Home {
-  logoutBtn: HTMLElement | null = null;
+  headerContainer: HTMLElement | null = null;
   editBtnTest: HTMLElement | null = null;
   createPostForm: HTMLElement | null = null;
   postsContainer: HTMLElement | null = null;
   postText: NodeListOf<HTMLElement> | null = null;
   postImages: NodeListOf<HTMLElement> | null = null;
   editBtn: NodeListOf<HTMLElement> | null = null;
+  deleteBtn: NodeListOf<HTMLElement> | null = null;
+  postSection: NodeListOf<HTMLElement> | null = null;
   userId: string = "";
   dbKeyValues: string[] = [];
   postUserId: string = "";
@@ -23,9 +32,11 @@ export class Home {
   userText: string[] = [];
   userImages: string[][] = [];
   post: Post;
+  header: Header;
 
   constructor() {
     this.post = new Post();
+    this.header = new Header();
   }
 
   render(viewport: HTMLDivElement | null) {
@@ -33,25 +44,13 @@ export class Home {
       viewport.innerHTML = HomeHtml;
     }
     this.postsContainer = document.getElementById("posts");
-    this.logoutBtn = document.getElementById("logout");
+    this.headerContainer = document.getElementById("header");
     this.createPostForm = document.getElementById("create-post");
-    this.logoutBtn?.addEventListener("click", () => this.handleLogout());
+    this.header.render(this.headerContainer as HTMLDivElement);
     this.createPostForm?.addEventListener("submit", (event: Event) =>
       this.handleSubmit(event)
     );
     this.handlePosts();
-  }
-
-  handleLogout() {
-    firebase
-      .auth()
-      .signOut()
-      .then(() => {
-        window.location.hash = "login";
-      })
-      .catch((error) => {
-        console.log("Ocurrió un error al desconectar al usuario:", error);
-      });
   }
 
   async handleSubmit(event: Event) {
@@ -121,12 +120,13 @@ export class Home {
     get(query).then((snapshot) => {
       if (snapshot.exists()) {
         const values = snapshot.val();
-        console.log(values);
         for (const value in values) {
           this.post.render(this.postsContainer as HTMLDivElement);
           this.postText = document.querySelectorAll(".post-text");
           this.postImages = document.querySelectorAll(".post-images");
           this.editBtn = document.querySelectorAll("#edit-btn");
+          this.deleteBtn = document.querySelectorAll("#delete-btn");
+          this.postSection = document.querySelectorAll(".post-section");
           this.userText.push(values[value].userText);
           this.userImages.push(JSON.parse(values[value].images));
           this.usersIds.push(values[value].userId);
@@ -143,7 +143,20 @@ export class Home {
           for (let i = 0; i < this.editBtn!.length; i++) {
             if (this.postUserId !== this.usersIds[i] && i === index) {
               this.editBtn![i].classList.add("hidden");
+              this.deleteBtn![i].classList.add("hidden");
             } else {
+              this.deleteBtn![i].addEventListener("click", () => {
+                if (this.postUserId === this.usersIds[i]) {
+                  const postRef = refDb(db, `posts/${this.dbKeyValues[i]}`);
+                  remove(postRef).then(() => {
+                    this.postText![i].textContent = "";
+                    this.postImages![i].innerHTML = "";
+                    this.editBtn![i].classList.add("hidden");
+                    this.deleteBtn![i].classList.add("hidden");
+                    this.postSection![i].classList.add("hidden");
+                  });
+                }
+              });
               this.editBtn![i].addEventListener("click", () => {
                 this.postText![i].contentEditable = "true";
                 this.postText![i].focus();
